@@ -2,29 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* CircularStd font - add your font files or use a CDN */
-@font-face {
-  font-family: "CircularStd";
-  src: url("/fonts/CircularStd-Book.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "CircularStd";
-  src: url("/fonts/CircularStd-Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "CircularStd";
-  src: url("/fonts/CircularStd-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-}
-
-/* Fluent-inspired base styles */
+/* Use system fonts - CircularStd can be added later if needed */
 :root {
   --primary: #ea580b;
   --primary-hover: #c2410c;
@@ -39,24 +17,81 @@
 
 body {
   color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Fluent card style */
+/* Fluent-inspired card style */
 .card {
   @apply bg-white rounded-lg border border-neutral-200 shadow-sm;
 }
 
 /* Primary button */
 .btn-primary {
-  @apply bg-primary text-white px-4 py-2 rounded-md font-medium 
-         hover:bg-primary-600 transition-colors;
+  @apply bg-primary text-white px-4 py-2 rounded-md font-medium
+         hover:bg-orange-700 transition-colors inline-flex items-center justify-center;
+}
+
+.btn-primary:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Secondary button */
+.btn-secondary {
+  @apply bg-neutral-100 text-neutral-700 px-4 py-2 rounded-md font-medium
+         hover:bg-neutral-200 transition-colors inline-flex items-center justify-center;
 }
 
 /* Script speaker labels */
 .speaker-doug {
-  @apply text-blue-700 font-medium;
+  @apply text-blue-700 font-semibold;
 }
 
 .speaker-claire {
-  @apply text-primary font-medium;
+  @apply text-primary font-semibold;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Prose styles for script content */
+.prose {
+  line-height: 1.75;
+}
+
+.prose hr {
+  border-color: #e5e5e5;
+  margin: 1.5rem 0;
 }
