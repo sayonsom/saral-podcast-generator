@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, Episode } from "@/lib/api";
-import { ScriptViewer } from "@/components";
+import { ScriptViewer, AudioPanel } from "@/components";
 
 export default function EpisodeDetailPage() {
   const params = useParams();
@@ -171,6 +171,9 @@ export default function EpisodeDetailPage() {
           )}
         </div>
       )}
+
+      {/* Audio Generation */}
+      <AudioPanel episodeId={episode.id} />
 
       {/* Script */}
       <ScriptViewer episode={episode} />

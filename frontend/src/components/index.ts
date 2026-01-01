@@ -5,3 +5,4 @@ export { EpisodeCard } from "./EpisodeCard";
 export { GenerationWizard } from "./GenerationWizard";
 export { ScriptViewer } from "./ScriptViewer";
 export { CharacterCard } from "./CharacterCard";
+export { AudioPanel } from "./AudioPanel";

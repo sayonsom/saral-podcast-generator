@@ -217,6 +217,10 @@ episodes_output/
 generated/
 output/
 generated_script.txt
+audio_output/
+
+# PID files for start/teardown scripts
+.pids/
 
 # Temporary files
 tmp/
