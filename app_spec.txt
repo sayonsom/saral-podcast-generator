@@ -1,0 +1,332 @@
+================================================================================
+ESPRESSO ENERGY PODCAST SCRIPT GENERATOR - APPLICATION SPECIFICATION
+================================================================================
+
+PROJECT: "Energy Debates" - AI-Powered Podcast Script Generator
+VERSION: 1.0.0
+STACK: FastAPI + Next.js + Anthropic Claude API
+
+--------------------------------------------------------------------------------
+OVERVIEW
+--------------------------------------------------------------------------------
+
+Convert markdown blog posts into engaging debate-style podcast scripts between
+two energy industry veterans with contrasting viewpoints but mutual respect.
+
+CHARACTERS:
+- DOUG (Host): Retired FERC lawyer, old-school right-wing, dry humor, loves
+  regulatory precedent, skeptical of rapid change, respects markets
+- CLAIRE (Commentator): Ex-McKinsey, now Lead Consultant at Espresso, left-leaning,
+  data-driven, pro-innovation, pragmatic about policy
+
+TONE: Funny, human, respectful senior professional banter. Think NPR meets
+energy industry happy hour.
+
+--------------------------------------------------------------------------------
+CORE FEATURES
+--------------------------------------------------------------------------------
+
+1. BLOG INGESTION
+   - Accept markdown files via upload or paste
+   - Parse frontmatter (title, date, tags, summary)
+   - Extract key facts, statistics, quotes
+   - Identify main themes and arguments
+
+2. DEEP RESEARCH EXPANSION
+   - Use Claude to expand beyond blog facts
+   - Generate 2nd/3rd degree insights:
+     * What this means for utilities
+     * Impact on retail customers
+     * Opportunities for energy startups
+     * Regulatory implications
+     * Market dynamics
+   - Pull in relevant FERC orders, PUC decisions (via web search if enabled)
+
+3. SCRIPT GENERATION
+   - Opening banter (weather, sports, industry gossip)
+   - Previous episode callbacks (stored in DB)
+   - Main discussion structured as:
+     * Doug introduces topic with skeptical framing
+     * Claire presents data-driven counterpoint
+     * Back-and-forth debate with humor
+     * Points of agreement (important!)
+     * Takeaways for different stakeholders
+   - Closing with teaser for next episode
+   - Attribution: "as Dr. Cheyenne wrote on his blog at askespresso.com"
+
+4. EPISODE MANAGEMENT
+   - Store generated scripts with metadata
+   - Track episode summaries for callbacks
+   - Version control for script iterations
+   - Export to various formats (txt, docx, teleprompter)
+
+5. CUSTOMIZATION
+   - Adjust humor level (1-5)
+   - Episode length (short: 10min, medium: 20min, long: 30min)
+   - Focus areas (utility, startup, regulatory, consumer)
+   - Add custom talking points
+
+--------------------------------------------------------------------------------
+ARCHITECTURE
+--------------------------------------------------------------------------------
+
+BACKEND (FastAPI):
+/api
+  /blogs
+    POST   /upload          - Upload markdown blog
+    GET    /                 - List all blogs
+    GET    /{id}            - Get blog details
+    DELETE /{id}            - Remove blog
+  
+  /episodes
+    POST   /generate        - Generate script from blog
+    GET    /                 - List episodes
+    GET    /{id}            - Get episode details
+    GET    /{id}/export     - Export script (format param)
+    PUT    /{id}            - Update/regenerate
+    DELETE /{id}            - Remove episode
+  
+  /settings
+    GET    /characters      - Get character profiles
+    PUT    /characters      - Update character details
+    GET    /callbacks       - Get previous episode summaries
+
+FRONTEND (Next.js):
+/                           - Dashboard, recent episodes
+/upload                     - Blog upload interface
+/generate                   - Script generation wizard
+/episodes                   - Episode library
+/episodes/[id]              - View/edit script
+/settings                   - Character customization
+
+--------------------------------------------------------------------------------
+DATA MODELS
+--------------------------------------------------------------------------------
+
+Blog:
+  id: uuid
+  title: string
+  content: string (markdown)
+  summary: string
+  tags: string[]
+  key_facts: string[]
+  created_at: datetime
+  
+Episode:
+  id: uuid
+  blog_id: uuid (FK)
+  title: string
+  script: string
+  duration_estimate: int (minutes)
+  humor_level: int (1-5)
+  focus_areas: string[]
+  summary: string (for callbacks)
+  insights: {
+    utilities: string[]
+    consumers: string[]
+    startups: string[]
+    regulatory: string[]
+  }
+  created_at: datetime
+  updated_at: datetime
+
+Character:
+  name: string
+  role: string
+  background: string
+  political_lean: string
+  speech_patterns: string[]
+  catchphrases: string[]
+  expertise_areas: string[]
+
+--------------------------------------------------------------------------------
+PROMPT ENGINEERING NOTES
+--------------------------------------------------------------------------------
+
+Script generation uses multi-stage prompting:
+
+STAGE 1: Blog Analysis
+- Extract facts, claims, data points
+- Identify controversial or debatable elements
+- Tag relevance to different stakeholders
+
+STAGE 2: Research Expansion
+- Generate follow-up questions a senior economist would ask
+- Identify regulatory precedents
+- Connect to broader market trends
+- Develop 2nd/3rd degree implications
+
+STAGE 3: Script Outline
+- Map debate flow
+- Assign perspectives to characters
+- Insert humor opportunities
+- Plan callbacks to previous episodes
+
+STAGE 4: Full Script Generation
+- Write natural dialogue
+- Include stage directions [laughs], [sighs], etc.
+- Add timing markers
+- Ensure attribution to Dr. Cheyenne's blog
+
+--------------------------------------------------------------------------------
+DEPLOYMENT (GCP)
+--------------------------------------------------------------------------------
+
+- Cloud Run for FastAPI backend
+- Cloud Storage for uploaded blogs and generated scripts
+- Firestore for metadata (or Cloud SQL if preferred)
+- Secret Manager for API keys
+- Cloud Build for CI/CD
+
+--------------------------------------------------------------------------------
+PHASE 2: AUDIO GENERATION (ElevenLabs)
+--------------------------------------------------------------------------------
+
+1. VOICE CONFIGURATION
+   - Doug: Deep, measured, authoritative male voice (e.g., "Adam" or custom clone)
+   - Claire: Warm, articulate female voice (e.g., "Rachel" or custom clone)
+   - Store voice_id mappings in config
+   - Support custom voice clones for brand consistency
+
+2. SCRIPT-TO-SPEECH PIPELINE
+   - Parse approved script into speaker segments
+   - Strip stage directions [laughs], [sighs] (or map to audio effects)
+   - Generate audio per segment via ElevenLabs API
+   - Handle timing markers for sync
+   - Concatenate segments in order
+   - Add natural pauses between speakers (200-500ms)
+
+3. AUDIO POST-PROCESSING
+   - Join: intro_music.mp3 + generated_speech.mp3 + outro_music.mp3
+   - Crossfade transitions (configurable: 1-3 seconds)
+   - Normalize audio levels across all segments
+   - Apply light compression for podcast standards
+   - Output: final_episode.mp3 (podcast-ready)
+   - Store music files in GCS bucket
+
+4. AUDIO ENDPOINTS
+   /api/audio
+     POST /generate/{episode_id}    - Generate speech from approved script
+     GET  /status/{job_id}          - Check generation progress
+     POST /finalize/{episode_id}    - Join with intro/outro, normalize
+     GET  /{episode_id}/download    - Download final MP3
+
+--------------------------------------------------------------------------------
+PHASE 3: SPOTIFY PUBLISHING
+--------------------------------------------------------------------------------
+
+1. METADATA GENERATION
+   - Episode title (from script)
+   - Description: 2-3 paragraph summary with timestamps
+   - Keywords/tags for discoverability
+   - Chapter markers (from timing markers in script)
+   - Content advisory (clean/explicit)
+
+2. THUMBNAIL GENERATION
+   - Search Unsplash API for relevant image based on episode topic
+   - Keywords extracted from blog analysis
+   - Overlay episode title + branding
+   - Output: 3000x3000px JPEG (Spotify spec)
+   - Fallback: template with solid color + text
+
+3. SPOTIFY UPLOAD
+   - OAuth2 flow for Spotify for Podcasters API
+   - Upload MP3 file
+   - Attach metadata + thumbnail
+   - Set publish date (immediate or scheduled)
+   - Return episode URL
+
+4. PUBLISHING ENDPOINTS
+   /api/publish
+     POST /metadata/{episode_id}    - Generate description, tags, chapters
+     POST /thumbnail/{episode_id}   - Generate artwork via Unsplash
+     GET  /thumbnail/{episode_id}   - Preview/download thumbnail
+     POST /spotify/{episode_id}     - Upload to Spotify
+     GET  /spotify/auth             - OAuth redirect
+     GET  /spotify/callback         - OAuth callback
+
+--------------------------------------------------------------------------------
+DATA MODEL ADDITIONS
+--------------------------------------------------------------------------------
+
+AudioJob:
+  id: uuid
+  episode_id: uuid (FK)
+  status: enum (pending, processing, complete, failed)
+  segments: list[AudioSegment]
+  intro_path: string (GCS)
+  outro_path: string (GCS)
+  output_path: string (GCS)
+  duration_seconds: int
+  created_at: datetime
+
+AudioSegment:
+  speaker: enum (doug, claire)
+  text: string
+  voice_id: string
+  audio_path: string (GCS)
+  duration_ms: int
+
+PublishMetadata:
+  episode_id: uuid (FK)
+  title: string
+  description: string
+  keywords: list[string]
+  chapters: list[Chapter]
+  thumbnail_url: string
+  spotify_episode_id: string (after publish)
+  published_at: datetime
+
+Chapter:
+  title: string
+  start_time: string (HH:MM:SS)
+
+--------------------------------------------------------------------------------
+ENVIRONMENT VARIABLES (ADDITIONS)
+--------------------------------------------------------------------------------
+
+ELEVENLABS_API_KEY=...
+ELEVENLABS_DOUG_VOICE_ID=...
+ELEVENLABS_CLAIRE_VOICE_ID=...
+
+UNSPLASH_ACCESS_KEY=...
+
+SPOTIFY_CLIENT_ID=...
+SPOTIFY_CLIENT_SECRET=...
+SPOTIFY_REDIRECT_URI=http://localhost:3000/api/spotify/callback
+SPOTIFY_SHOW_ID=...  # Your podcast show ID
+
+--------------------------------------------------------------------------------
+AUDIO FILE REQUIREMENTS
+--------------------------------------------------------------------------------
+
+Intro Music (intro.mp3):
+  - Duration: 5-15 seconds
+  - Fade out at end
+  - Store in GCS: gs://bucket/audio/intro.mp3
+
+Outro Music (outro.mp3):
+  - Duration: 10-20 seconds
+  - Fade in at start
+  - Store in GCS: gs://bucket/audio/outro.mp3
+
+Final Output Specs:
+  - Format: MP3
+  - Bitrate: 128-192 kbps (Spotify recommendation)
+  - Sample rate: 44.1 kHz
+  - Channels: Stereo
+  - Loudness: -16 LUFS (podcast standard)
+
+--------------------------------------------------------------------------------
+FUTURE ENHANCEMENTS
+--------------------------------------------------------------------------------
+
+- Custom voice cloning for Doug/Claire
+- Live episode recording integration
+- Real-time web search for current FERC docket items
+- Guest character system (add industry experts)
+- Audience Q&A segment generation
+- RSS feed for multi-platform distribution
+- Analytics dashboard (listens, engagement)
+
+================================================================================
