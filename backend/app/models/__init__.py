@@ -1,9 +1,14 @@
 """Data models for blogs and episodes."""
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Literal
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
+
+
+def _utc_now() -> datetime:
+    """Return current UTC time (timezone-aware)."""
+    return datetime.now(timezone.utc)
 
 
 class Blog(BaseModel):
@@ -13,7 +18,7 @@ class Blog(BaseModel):
     summary: str | None = None
     tags: list[str] = []
     key_facts: list[str] = []
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=_utc_now)
 
 
 class BlogAnalysis(BaseModel):
@@ -49,8 +54,8 @@ class Episode(BaseModel):
     focus_areas: list[str] = []
     summary: str = ""  # for callbacks in future episodes
     insights: Insights = Field(default_factory=Insights)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=_utc_now)
+    updated_at: datetime = Field(default_factory=_utc_now)
 
 
 class Character(BaseModel):

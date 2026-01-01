@@ -216,6 +216,7 @@ docker-compose.override.yaml
 episodes_output/
 generated/
 output/
+generated_script.txt
 
 # Temporary files
 tmp/
